@@ -15,3 +15,11 @@ const copyOfSomeObj = someObj
 console.log('copyOfSomeObj = ', copyOfSomeObj.a,', ', copyOfSomeObj.r)
 copyOfSomeObj.k = 'abc'
 console.log('copyOfSomeObj with new k = ', copyOfSomeObj.a, copyOfSomeObj.r, copyOfSomeObj.k )
+function a() {
+    console.log('Hey there')
+}
+a()
+const newFunct = () =>{
+    console.log("Hello, with new function")
+}
+newFunct()
