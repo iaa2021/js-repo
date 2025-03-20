@@ -23,3 +23,4 @@ const newFunct = () =>{
     console.log("Hello, with new function")
 }
 newFunct()
+console.dir(someObj)
