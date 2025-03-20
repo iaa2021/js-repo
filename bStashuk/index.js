@@ -8,7 +8,8 @@ Object(d = c) // init a reference
 console.log('object d = ', d)
 const someObj = {
     a: 10,
-    r: true 
+    r: true, 
+    c
 }// another way of reference's init
 console.log('object someObj = ', someObj.a,', ', someObj.r)
 const copyOfSomeObj = someObj
@@ -24,3 +25,4 @@ const newFunct = () =>{
 }
 newFunct()
 console.dir(someObj)
+console.log(someObj)
