@@ -26,3 +26,6 @@ const newFunct = () =>{
 newFunct()
 console.dir(someObj)
 console.log(someObj)
+const strSomeObj = JSON.stringify(someObj)
+console.log(strSomeObj)
+console.log(JSON.parse(strSomeObj))
