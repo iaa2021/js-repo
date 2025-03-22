@@ -20,12 +20,16 @@ function a() {
     console.log('Hey there')
 }
 a()
-const newFunct = () =>{
+const newFunct = (l, m) =>{
     console.log("Hello, with new function")
+    const i = l + m
+    console.log(i)
+    return i
 }
-newFunct()
+let u = newFunct(7, 8)
 console.dir(someObj)
 console.log(someObj)
 const strSomeObj = JSON.stringify(someObj)
 console.log(strSomeObj)
 console.log(JSON.parse(strSomeObj))
+console.dir(newFunct)
