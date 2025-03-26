@@ -6,3 +6,6 @@ console.log('Start')
 setTimeout(myName, 2000)
 let a = 'abc'
 console.log('variable a is a ', typeof(a))
+let b = 11
+let c = 27
+console.log('c yelds to b is ', Boolean(b === c))
