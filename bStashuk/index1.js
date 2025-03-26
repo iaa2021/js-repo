@@ -9,3 +9,13 @@ console.log('variable a is a ', typeof(a))
 let b = 11
 let c = 27
 console.log('c yelds to b is ', Boolean(b === c))
+const button = {
+    width: 200,
+    text: 'Buy'
+}
+const redButton = {
+    ...button, 
+    color: 'red'
+}
+console.table(redButton)
+console.log(Date())
