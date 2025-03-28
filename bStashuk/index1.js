@@ -18,4 +18,8 @@ const redButton = {
     color: 'red'
 }
 console.table(redButton)
-console.log(Date())
+const newPost = (post, addedAt = Date()) => ({
+    ... post,
+    addedAt
+})
+console.table(newPost(redButton))
