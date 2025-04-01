@@ -16,7 +16,7 @@ const userInfo = ({name1, commentsQty}) =>{
 }
 userInfo(userProfile)
 console.log(userInfo(userProfile))
-const month = 3
+const month = 1
 switch (month) {
     case 12:
         console.log('december')
@@ -24,10 +24,11 @@ switch (month) {
     case 1:
         console.log('janiary')
         break;
-    case 2:
+    case 2: 
         console.log('febryary')
         break;
     default:
         console.log('This is not winter month.')
         break;
 }
+(month < 3 || month === 12) ? console.log('This is winter month.') : console.log('This is not winter month.')
