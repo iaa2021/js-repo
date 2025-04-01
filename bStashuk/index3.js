@@ -16,3 +16,18 @@ const userInfo = ({name1, commentsQty}) =>{
 }
 userInfo(userProfile)
 console.log(userInfo(userProfile))
+const month = 3
+switch (month) {
+    case 12:
+        console.log('december')
+        break;
+    case 1:
+        console.log('janiary')
+        break;
+    case 2:
+        console.log('febryary')
+        break;
+    default:
+        console.log('This is not winter month.')
+        break;
+}
