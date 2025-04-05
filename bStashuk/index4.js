@@ -13,3 +13,13 @@ for(key in myArray){
     console.log(key, '-', myArray[key])
 }
 console.table(someObj)
+Object.keys(someObj).forEach(element => {
+    console.log(element, someObj[element])
+}); // using keys method
+Object.values(someObj).forEach(element => {
+    console.log(element)
+}); // using values method
+const myString = 'Hello world.'
+for( key of myString ){
+    console.log(key)
+}
