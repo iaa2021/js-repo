@@ -18,3 +18,13 @@ const persona = {
 }
 const greeting = `Hello, my name is ${persona.name}!\nI am ${persona.age}`
 console.log(greeting)
+/* const createPerson = (fname, myAge, gender) =>{
+    return {
+    fname: fname,
+    myAge: myAge,
+    gender: gender
+    }
+    } */
+const createPerson = (fname, myAge, gender) => ({fname, myAge, gender}) 
+const myObj = (createPerson('iaa', 59, 'mail'))
+console.table(myObj)
