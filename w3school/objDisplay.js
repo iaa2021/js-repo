@@ -16,3 +16,6 @@ for( let [property, value] of Object.entries(person)){
 console.log("via Object.entries()\n", text);
 text = JSON.stringify(person);
 console.log("via JSON.stringify()\n", text);
+let text1 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+let length = text1.length;
+console.log(length)
