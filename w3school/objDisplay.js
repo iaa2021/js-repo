@@ -1,7 +1,10 @@
 const person = {
     pName : 'John',
     age : 30, 
-    city : 'Olbany'
+    city : 'Olbany',
+    fullName : function(){
+        return this.pName + ' ' + this.age;
+    }
 };
 console.log("via Object.values()\n" ,Object.values(person));
 let text = '';

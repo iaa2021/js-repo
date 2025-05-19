@@ -23,3 +23,7 @@ const myString = 'Hello world.'
 for( key of myString ){
     console.log(key)
 }
+let jsText = JSON.stringify(someObj);
+console.log(jsText);
+someObj1 = JSON.parse(jsText);
+console.log(someObj1);
