@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>
+    Individual alignment
+  </title> 
+</head>
+<body>
+
+<h2>JavaScript HTML DOM</h2>
+
+<p>Hello World!</p>
+
+<p>Hello Norway!</p>
+
+<p>Click the button to change the color of all p elements.</p>
+
+<button type="button" onclick="myFunction()">Try it</button>
+
+<script>
+function myFunction() {
+  const myCollection = document.getElementsByTagName("p");
+  for (let i in  myCollection) {
+    myCollection[i].style.backgroundColor = "yellow";
+    myCollection[i].style.color = "red";
+  }
+}
+</script>
+
+</body>
+</html>
