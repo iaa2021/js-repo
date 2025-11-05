@@ -28,5 +28,5 @@ rl.question('Enter your name: ', (name) => {
   setTimeout(() => {
     console.log(`Hello, ${name}!`);
     rl.close();
-  }, 1000);
+  }, 5000);
 });
