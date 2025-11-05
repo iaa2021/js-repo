@@ -25,8 +25,10 @@ const rl = readline.createInterface({
 });
 
 rl.question('Enter your name: ', (name) => {
-  setTimeout(() => {
-    console.log(`Hello, ${name}!`);
-    rl.close();
-  }, 5000);
+  rl.question('Enter your age: ', (age) => {
+    setTimeout(() => {
+      console.log(`Hello, ${name}! You are ${age} years old.`);
+      rl.close();
+    }, 2000); // wait 2 seconds
+  });
 });
