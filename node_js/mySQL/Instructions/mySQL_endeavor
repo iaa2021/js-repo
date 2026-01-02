@@ -28,4 +28,38 @@ The latest information about MariaDB is available at https://mariadb.org/.
 Consider joining MariaDB's strong and vibrant community:
 https://mariadb.org/get-involved/
 USER 'iaa'@'localhost' IDENTIFIED BY '061100' 
-login in mariaDB in console: mysql -u iaa -p than after require let us input password
+login in mariaDB in console: mysql -u iaa -p than after require let us input password 
+1️⃣ Log in as root (or admin)
+
+On Arch / EndeavourOS / Manjaro with MariaDB:
+
+sudo mariadb
+
+
+or
+
+sudo mysql
+
+
+(usually no password needed when using sudo)
+
+You should see:
+
+MariaDB [(none)]>
+
+2️⃣ Grant permission to iaa
+
+Run as root:
+
+GRANT CREATE ON *.* TO 'iaa'@'localhost';
+FLUSH PRIVILEGES;
+
+
+(Optional: verify)
+
+SHOW GRANTS FOR 'iaa'@'localhost';
+
+
+Exit:
+
+EXIT;
