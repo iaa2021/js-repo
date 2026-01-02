@@ -27,4 +27,5 @@ The latest information about MariaDB is available at https://mariadb.org/.
 
 Consider joining MariaDB's strong and vibrant community:
 https://mariadb.org/get-involved/
-USER 'iaa'@'localhost' IDENTIFIED BY '061100'
+USER 'iaa'@'localhost' IDENTIFIED BY '061100' 
+login in mariaDB in console: mysql -u iaa -p than after require let us input password
