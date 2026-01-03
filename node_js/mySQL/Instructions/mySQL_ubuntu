@@ -1,0 +1,113 @@
+Why GRANT CREATE ON *.* TO 'iaa'@'localhost'; failed
+ERROR 1410 (42000): You are not allowed to create a user with GRANT
+
+
+In MySQL 8, GRANT does NOT create users anymore.
+
+This error means one of these is true:
+
+User 'iaa'@'localhost' does not exist, or
+
+You are trying to grant global privileges without proper setup
+
+👉 You must create the user explicitly first.
+
+2️⃣ Why Node.js gets ER_ACCESS_DENIED_ERROR
+Access denied for user 'iaa'@'localhost' (using password: YES)
+
+
+This means authentication failed, not just missing privileges.
+
+Common causes:
+
+User exists but password is different
+
+User exists but uses incompatible auth plugin
+
+User exists only for another host (e.g. 'iaa'@'%')
+
+✅ Correct fix (step-by-step)
+
+Login as root without sudo inside MySQL (important):
+
+sudo mysql
+
+🔹 Step 1: Check if user exists
+SELECT user, host, plugin FROM mysql.user WHERE user = 'iaa';
+
+🔹 Step 2A: If user DOES NOT exist → create it
+CREATE USER 'iaa'@'localhost'
+IDENTIFIED WITH mysql_native_password
+BY '061100';
+
+
+⚠️ mysql_native_password is important for the Node mysql package.
+
+🔹 Step 2B: If user EXISTS → reset password + plugin
+ALTER USER 'iaa'@'localhost'
+IDENTIFIED WITH mysql_native_password
+BY '061100';
+
+🔹 Step 3: Grant required privileges
+
+For basic development (recommended):
+
+GRANT ALL PRIVILEGES ON *.* TO 'iaa'@'localhost';
+FLUSH PRIVILEGES;
+
+
+Or more restrictive (example):
+
+GRANT CREATE, SELECT, INSERT, UPDATE, DELETE
+ON *.* TO 'iaa'@'localhost';
+FLUSH PRIVILEGES;
+
+🔹 Step 4: Verify login manually
+
+Exit MySQL and test:
+
+mysql -u iaa -p
+
+
+If this fails → Node will also fail.
+
+✅ Node.js side (your code is OK)
+
+Your connection code is fine:
+
+let mysql = require('mysql');
+
+let con = mysql.createConnection({
+  host: "localhost",
+  user: "iaa",
+  password: "061100"
+});
+
+con.connect(err => {
+  if (err) throw err;
+  console.log("Connected!");
+  con.end();
+});
+
+🧠 Why this happens often on Ubuntu 22/24
+
+MySQL 8 defaults to caching_sha2_password
+
+The old mysql Node package does not support it well
+
+Solution is either:
+
+use mysql_native_password ✅ (what we did), or
+
+switch to mysql2 package
+
+🟢 Recommended long-term solution (optional)
+npm install mysql2
+
+
+Then:
+
+const mysql = require('mysql2');
+
+
+Works perfectly with MySQL 8.
