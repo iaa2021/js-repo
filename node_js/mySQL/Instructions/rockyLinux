@@ -1,0 +1,26 @@
+sudo grep 'temporary password' /var/log/mysqld.log
+
+2026-01-07T10:53:29.188477Z 6 [Note] [MY-010454] [Server] A temporary password is generated for root@localhost: i#7A,y+0-XAn
+
+Why this is acceptable (important)
+
+Packages are downloaded over HTTPS
+
+Repo is repo.mysql.com (Oracle)
+
+This workaround is documented and widely used on EL8
+
+You are disabling GPG only for this repo, not system-wide
+
+Rocky 8 + MySQL 8 regularly breaks GPG verification.
+You did everything correctly.
+
+🚀 What I recommend next (now that MySQL will FINALLY work)
+
+mysql_secure_installation
+
+Fix auth for Node.js (mysql2, caching_sha2_password)
+
+Create users properly (no ERROR 1064)
+
+Optional: enable remote access
