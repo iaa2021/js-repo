@@ -1,0 +1,34 @@
+let readline = require('readline');
+let mysql = require('mysql');
+
+let con = mysql.createConnection({
+    host : 'localhost',
+    user : 'iaa',
+    password : '061100',
+    database : 'mydb'
+})
+const rl = readline.createInterface({
+    input : process.stdin,
+    output : process.stdout
+})
+let values = [];
+function askQuestion(query){
+    return new Promise( resolve =>{
+        rl.question(query,resolve);
+    });
+}
+async function userSurvey() {
+    try{
+        const id = await askQuestion('What is your id?');
+        if(id === -1){
+        rl.close();
+        console.log(values);
+        return }
+        values.push(id);
+        const name = await askQuestion('What is your name?');
+        console.log(`id = ${id}, name is ${name}.`)
+    } catch(err){
+        console.error('Error occured: ', err);
+    } //finally{ rl.close()}
+}
+userSurvey();
