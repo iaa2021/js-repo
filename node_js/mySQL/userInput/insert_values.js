@@ -11,7 +11,7 @@ const rl = readline.createInterface({
     input : process.stdin,
     output : process.stdout
 })
-let values = [];
+let values = []; let object = [];
 function askQuestion(query){
     return new Promise( resolve =>{
         rl.question(query,resolve);
@@ -20,13 +20,16 @@ function askQuestion(query){
 async function userSurvey() {
     try{
         const id = await askQuestion('What is your id?');
-        if(id === -1){
+        if(Number(id) === -1){
         rl.close();
         console.log(values);
         return }
-        values.push(id);
+        object.push(id);
         const name = await askQuestion('What is your name?');
-        console.log(`id = ${id}, name is ${name}.`)
+        object.push(name);
+        values.push(object);
+        object = [];
+        userSurvey();
     } catch(err){
         console.error('Error occured: ', err);
     } //finally{ rl.close()}
