@@ -36,12 +36,12 @@ async function main() {
                 if(err) throw err;
                 let values = []; let object = [];
                 fields.forEach(element => {
-                   // console.log(element.name, ', ');
-                  //  object.push(element.name);
-                    // console.log(mysql.Types[element.type]);
-                    //object.push(mysql.Types[element.type]);
-                    values.push(element.name);
-                    //object = [];
+                   console.log(element.name, ', ');
+                  object.push(element.name);
+                    console.log(mysql.Types[element.type]);
+                    object.push(mysql.Types[element.type]);
+                    values.push(object);
+                    object = [];
                 })
                 console.log(values);
                 con.end();
