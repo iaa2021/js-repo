@@ -1,0 +1,2 @@
+#script for running vs code in rocky linux
+XDG_SESSION_TYPE=x11 code
