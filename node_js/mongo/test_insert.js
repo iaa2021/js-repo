@@ -7,14 +7,15 @@ async function run() {
   const client = new MongoClient(url, { serverSelectionTimeoutMS: 5000 });
 
   try {
-    console.log("Connecting...");
+    console.log("Attempting to connect...");
     await client.connect();
-    console.log("Connected successfully");
+    console.log("Connected successfully!");
 
     const db = client.db("mydb");
-    const collection = db.collection("customers");
+    console.log("Using DB:", db.databaseName);
 
-    const result = await collection.insertOne({ name: "Test Customer" });
+    const coll = db.collection("customers");
+    const result = await coll.insertOne({ name: "Verbose Test Customer" });
     console.log("Inserted document:", result);
 
   } catch (err) {
