@@ -13,7 +13,7 @@ const { MongoClient } = require('mongodb');
          console.log(result);
          } catch(err){ console.error("ERROR:", err); }
          finally{ 
-             client.close();
+             await client.close();
              console.log("Connection closed");
          }
      }
