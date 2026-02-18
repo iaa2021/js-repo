@@ -9,11 +9,9 @@ const { MongoClient } = require('mongodb');
          const db = client.db('mydb');
          console.log('Using database: ', db.databaseName);
          const coll = db.collection('customers');
-         const result = await coll.find(query).toArray((err, res) => {
-             if(err) throw err;
-         });
+         const result = await coll.find(query).toArray();
          console.log(result);
-         } catch(error){ console.error("ERROR:", err); }
+         } catch(err){ console.error("ERROR:", err); }
          finally{ 
              client.close();
              console.log("Connection closed");
