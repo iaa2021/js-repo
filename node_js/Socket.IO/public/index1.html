@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simple Chat</title>
+  <style>
+  body {
+    margin: 0;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  #messages {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    height: 400px;
+    overflow-y: auto;
+    }
+    #messages li {
+      padding: 8px 16px;
+      border-bottom: 1px solid #eee;
+    }
+    #messages li:last-child {
+      border-bottom: none;
+    }
+    #form {
+      display: flex;
+      margin-top: 10px;
+    }
+    #input {
+      flex-grow: 1;
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-left: 10px;
+      }
+    button:hover {
+      background: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <h1>Simple Chat</h1>
+
+  <!-- Username -->
+  <div id="username-container">
+    <input type="text" id="username-input" placeholder="Enter your username" />
+    <button id="set-username">Set Username</button>
+  </div>
+
+  <ul id="messages"></ul>
+
+  <form id="form">
+    <input id="input" autocomplete="off" placeholder="Type your message..." />
+    <button>Send</button>
+  </form>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    const form = document.getElementById('form');
+    const input = document.getElementById('input');
+    const messages = document.getElementById('messages');
+    const usernameInput = document.getElementById('username-input');
+    const setUsernameBtn = document.getElementById('set-username');
+
+    // Send message
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const message = input.value.trim();
+      if (message) {
+        socket.emit('chat message', message);
+        input.value = '';
+      }
+    });
+
+    // Set username
+    let username = 'Anonymous';
+    setUsernameBtn.addEventListener('click', () => {
+  const newUsername = usernameInput.value.trim();
+  if (newUsername) {
+    username = newUsername; // store locally
+    socket.emit('set username', newUsername);
+    usernameInput.value = '';
+  }
+});
+
+// Send message with username
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const message = input.value.trim();
+  if (message) {
+    socket.emit('chat message', { username, message }); // send as object
+    input.value = '';
+  }
+});
+
+    // Receive message
+    socket.on('chat message', (data) => {
+  const item = document.createElement('li');
+
+  const strong = document.createElement('strong');
+  strong.textContent = data.username + ': ';
+
+  const text = document.createTextNode(data.message);
+
+  item.appendChild(strong);
+  item.appendChild(text);
+
+  messages.appendChild(item);
+  messages.scrollTop = messages.scrollHeight;
+});
+
+    socket.on('user joined', (data) => {
+  const item = document.createElement('li');
+  item.className = 'system-message';
+  item.textContent =
+    data.oldUsername === 'Anonymous'
+      ? `${data.newUsername} has joined the chat`
+      : `${data.oldUsername} is now known as ${data.newUsername}`;
+  messages.appendChild(item);
+  messages.scrollTop = messages.scrollHeight;
+});
+
+    socket.on('user left', (data) => {
+  const item = document.createElement('li');
+  item.className = 'system-message';
+  item.textContent = `${data.username} has left the chat`;
+  messages.appendChild(item);
+});
+  </script>
+</body>
+</html>
