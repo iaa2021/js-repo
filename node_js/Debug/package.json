@@ -2,12 +2,15 @@
   "name": "debug",
   "version": "1.0.0",
   "description": "",
-  "main": "memLeakServer.js", 
+  "main": "memLeakServer.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "nodemon": "^3.1.14"
+  }
 }
