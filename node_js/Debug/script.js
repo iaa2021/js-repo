@@ -4,7 +4,6 @@ document.querySelector('.one').onclick = () => {
     let out = '';
     for (let i = 0; i < a; i++) {
         out += i + ', ';
-        
+        document.querySelector('.out').innerHTML = out;
     }
-    document.querySelector('.out').innerHTML = out;
 }
