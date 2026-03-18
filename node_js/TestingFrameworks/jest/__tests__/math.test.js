@@ -1,4 +1,4 @@
-import { sum, divide } from '../utils/math';
+import { sum, divide } from '../utils/math.js';
 
 describe('Math utilities', () => {
   describe('sum()', () => {
