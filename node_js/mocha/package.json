@@ -1,0 +1,32 @@
+{
+  "name": "mocha",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "c8 mocha"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "nyc": {
+    "include": [
+      "utils/**/*.js"
+    ],
+    "reporter": [
+      "text",
+      "html"
+    ],
+    "all": true
+  },
+  "devDependencies": {
+    "c8": "^11.0.0",
+    "chai": "^6.2.2",
+    "mocha": "^11.7.5",
+    "nyc": "^18.0.0"
+  }
+}
