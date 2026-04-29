@@ -1,0 +1,44 @@
+import v8Profiler  from 'v8-profiler-node8';
+import fs  from 'fs';
+import path from 'path';
+
+// Enable source map support for accurate profiling
+import sourceMapSupport from 'source-map-support';
+sourceMapSupport.install();
+
+// Start CPU profiling with source map support
+v8Profiler.setGenerateType(1); // Include type information
+const profile = v8Profiler.startProfiling('CPU profile', true);
+
+// Run code to profile
+function fibonacci(n) {
+  if (n <= 1) return n;
+  return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+// Simulate both CPU and I/O work
+function processData() {
+  const start = Date.now();
+  fibonacci(35);
+  console.log(`CPU work took: ${Date.now() - start}ms`);
+
+  // Simulate async work
+  setImmediate(() => {
+    const asyncStart = Date.now();
+    fibonacci(30);
+    console.log(`Async work took: ${Date.now() - asyncStart}ms`);
+  });
+}
+
+processData();
+
+// Stop profiling after async work completes
+setTimeout(() => {
+  const profile = v8Profiler.stopProfiling('CPU profile');
+  profile.export((error, result) => {
+    const filename = path.join(__dirname, 'profile.cpuprofile');
+    fs.writeFileSync(filename, result);
+    console.log(`CPU profile saved to ${filename}`);
+    profile.delete();
+  });
+}, 1000);
