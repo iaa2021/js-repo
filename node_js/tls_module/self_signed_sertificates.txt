@@ -1,0 +1,13 @@
+ # Generate CA certificate
+openssl genrsa -out ca-key.pem 2048
+openssl req -new -x509 -key ca-key.pem -out ca-cert.pem -days 365
+
+# Generate server certificate
+openssl genrsa -out server-key.pem 2048
+openssl req -new -key server-key.pem -out server-csr.pem
+openssl x509 -req -in server-csr.pem -CA ca-cert.pem -CAkey ca-key.pem -CAcreateserial -out server-cert.pem -days 365
+
+# Generate client certificate (optional, for mutual authentication)
+openssl genrsa -out client-key.pem 2048
+openssl req -new -key client-key.pem -out client-csr.pem
+openssl x509 -req -in client-csr.pem -CA ca-cert.pem -CAkey ca-key.pem -CAcreateserial -out client-cert.pem -days 365
