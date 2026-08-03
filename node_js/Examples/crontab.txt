@@ -1,0 +1,274 @@
+cron and crontab are standard Unix/Linux tools for running commands 
+automatically at scheduled times. They're commonly used for system 
+maintenance, backups, log rotation, sending emails, and running scripts.
+
+What is cron?
+
+cron is a background service (daemon) that runs continuously and checks 
+every minute whether any scheduled jobs need to be executed.
+
+The name comes from the Greek word "chronos", meaning time.
+
+You can check whether the service is running:
+
+systemctl status cron        # Ubuntu, Debian
+
+or
+
+systemctl status crond       # Fedora, Rocky Linux, RHEL, openSUSE
+
+Start it if necessary:
+
+Ubuntu/Debian:
+
+sudo systemctl start cron
+sudo systemctl enable cron
+
+Fedora/RHEL/Rocky/openSUSE:
+
+sudo systemctl start crond
+sudo systemctl enable crond
+What is crontab?
+
+crontab (cron table) is the file that contains scheduled jobs.
+
+Each user can have their own crontab.
+
+Display your current crontab:
+
+crontab -l
+
+Edit it:
+
+crontab -e
+
+Remove it:
+
+crontab -r
+
+List another user's crontab (root only):
+
+sudo crontab -u username -l
+Crontab Format
+
+Each line has six parts:
+
+* * * * * command
+│ │ │ │ │
+│ │ │ │ └── Day of week (0-7)
+│ │ │ │      0 and 7 = Sunday
+│ │ │ └──── Month (1-12)
+│ │ └────── Day of month (1-31)
+│ └──────── Hour (0-23)
+└────────── Minute (0-59)
+
+Example:
+
+30 14 * * * /home/user/backup.sh
+
+Runs every day at 2:30 PM.
+
+Examples
+Every minute
+* * * * * echo "Hello"
+Every hour
+0 * * * * /home/user/script.sh
+
+Runs at:
+
+01:00
+02:00
+03:00
+...
+Every day at midnight
+0 0 * * * /home/user/cleanup.sh
+Every Monday at 8:00
+0 8 * * 1 /home/user/report.sh
+Every Sunday at 3:30 AM
+30 3 * * 0 /home/user/weekly.sh
+Every 15 minutes
+*/15 * * * * /home/user/script.sh
+
+Runs at
+
+00
+15
+30
+45
+Every 2 hours
+0 */2 * * * command
+
+Runs at
+
+00:00
+02:00
+04:00
+06:00
+...
+Every weekday
+0 9 * * 1-5 command
+
+Monday through Friday at 9 AM.
+
+Special Characters
+Asterisk (*)
+
+Means "every".
+
+* * * * *
+
+Every minute.
+
+Comma (,)
+
+Multiple values.
+
+0 8,12,16 * * *
+
+Runs at
+
+08:00
+12:00
+16:00
+Dash (-)
+
+Range.
+
+0 9-17 * * *
+
+Runs every hour between 9 AM and 5 PM.
+
+Slash (/)
+
+Step value.
+
+*/5 * * * *
+
+Every five minutes.
+
+Special Strings
+
+Instead of numbers:
+
+@reboot
+
+Runs once when the system boots.
+
+@hourly
+
+Once every hour.
+
+@daily
+
+Once a day.
+
+@weekly
+
+Weekly.
+
+@monthly
+
+Monthly.
+
+@yearly
+
+Yearly.
+
+Example:
+
+@reboot /home/user/start-server.sh
+Where are crontabs stored?
+
+User crontabs are usually stored in:
+
+Ubuntu:
+
+/var/spool/cron/crontabs/
+
+RHEL/Fedora/Rocky:
+
+/var/spool/cron/
+
+System-wide cron files:
+
+/etc/crontab
+/etc/cron.d/
+/etc/cron.daily/
+/etc/cron.hourly/
+/etc/cron.weekly/
+/etc/cron.monthly/
+Environment Variables
+
+Cron runs with a minimal environment, so commands that work in a terminal
+ may fail under cron.
+
+For example, specify the shell and PATH explicitly:
+
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+
+Or use full paths to executables:
+
+/usr/bin/python3 /home/user/script.py
+
+instead of
+
+python3 script.py
+Redirecting Output
+
+Save output to a log:
+
+0 * * * * /home/user/script.sh >> /home/user/script.log 2>&1
+
+Discard all output:
+
+0 * * * * /home/user/script.sh > /dev/null 2>&1
+Example Backup Job
+
+Suppose you have:
+
+/home/andrey/backup.sh
+
+Make it executable:
+
+chmod +x /home/andrey/backup.sh
+
+Add to your crontab:
+
+0 2 * * * /home/andrey/backup.sh
+
+It will run every day at 2:00 AM.
+
+Viewing Cron Logs
+
+On Ubuntu/Debian:
+
+grep CRON /var/log/syslog
+
+On systems using systemd's journal:
+
+journalctl -u cron
+
+or
+
+journalctl -u crond
+Common Mistakes
+Forgetting to make a script executable (chmod +x script.sh).
+Using relative paths instead of absolute paths.
+Assuming the same environment variables as an interactive shell.
+Not redirecting output, making errors harder to diagnose.
+Forgetting that cron uses the system's local timezone.
+cron vs systemd Timers
+
+Many modern Linux distributions also support systemd timers, which are an
+ alternative to cron.
+
+Feature	cron	systemd timer
+Available on most Unix/Linux systems	✅	Linux with systemd only
+Simple scheduling	✅	✅
+Calendar expressions	Basic	More flexible
+Dependency management	❌	✅
+Persistent jobs (run missed tasks after boot)	❌	✅ (Persistent=true)
+Integrated logging	Limited	Excellent (journalctl)
+
+For simple periodic tasks, cron is often sufficient. For services on modern Linux systems that already use systemd, timers can provide better logging, dependency handling, and recovery after downtime.
