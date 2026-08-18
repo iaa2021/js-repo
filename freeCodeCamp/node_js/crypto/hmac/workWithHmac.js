@@ -1,0 +1,13 @@
+import crypto from 'crypto';
+import fs from 'fs';
+import {Buffer} from 'buffer';
+import { createSignature, verifySignature } from './functions.mjs';
+const myKey = 'mySecretKey';
+const wrongKey = 'wrongKey';
+const message = 'My very secret message';
+const signature = createSignature(message, myKey);
+console.log('My signature is :', signature);
+let result = verifySignature(message, signature, myKey);
+console.log('Result is: ', result);
+result = verifySignature(message, signature, wrongKey);
+console.log('\nNew result is: ', result);

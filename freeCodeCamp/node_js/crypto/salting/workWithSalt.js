@@ -1,0 +1,12 @@
+import crypto from 'crypto';
+import { Buffer } from 'buffer';
+import fs from 'fs';
+import { hashPassword, verifyPassword } from './functions.mjs';
+const myPass = 'myPasswd';
+const wrongPass = 'myWrongPasswd';
+const {salt, hash} = hashPassword(myPass);
+console.log('My salt: ', salt, '\nMy hash: ', hash);
+let result = verifyPassword(myPass, hash, salt);
+console.log('\nResult is: ', result);
+result = verifyPassword(wrongPass, hash, salt);
+console.log('\nNew result is: ', result);
