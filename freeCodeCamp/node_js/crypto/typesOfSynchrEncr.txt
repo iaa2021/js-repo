@@ -1,0 +1,106 @@
+Yes. AES-256-CBC is one member of a much larger family of symmetric encryption algorithms/modes.
+
+The important distinction is:
+
+Algorithm: AES, ChaCha20, 3DES, Camellia, etc.
+Mode: CBC, GCM, CTR, CFB, OFB, etc.
+Key size and IV/nonce size depend on the algorithm/mode.
+Common symmetric algorithms
+Algorithm / mode	Key size	IV / nonce size	Notes
+AES-128-CBC	16 bytes	16 bytes	AES, CBC mode
+AES-192-CBC	24 bytes	16 bytes	AES, CBC mode
+AES-256-CBC	32 bytes	16 bytes	Your current example
+AES-128-GCM	16 bytes	usually 12 bytes	Authenticated encryption
+AES-192-GCM	24 bytes	usually 12 bytes	Authenticated encryption
+AES-256-GCM	32 bytes	usually 12 bytes	Recommended over CBC for new applications
+AES-128-CTR	16 bytes	16 bytes	No authentication by itself
+AES-256-CTR	32 bytes	16 bytes	No authentication by itself
+AES-128-CFB	16 bytes	16 bytes	No authentication
+AES-256-CFB	32 bytes	16 bytes	No authentication
+AES-128-OFB	16 bytes	16 bytes	No authentication
+AES-256-OFB	32 bytes	16 bytes	No authentication
+ChaCha20	32 bytes	16 bytes	12-byte nonce in common constructions
+ChaCha20-Poly1305	32 bytes	12 bytes	Authenticated encryption; excellent modern choice
+3DES	24 bytes	8 bytes	Legacy; generally avoid
+Blowfish	4–56 bytes	8 bytes	Legacy
+Camellia-128-CBC	16 bytes	16 bytes	Similar structure to AES-CBC
+Camellia-256-CBC	32 bytes	16 bytes	Similar structure to AES-CBC
+For Node.js specifically
+
+You will commonly see:
+
+aes-128-cbc
+aes-192-cbc
+aes-256-cbc
+
+
+aes-128-gcm
+aes-192-gcm
+aes-256-gcm
+
+
+aes-128-ctr
+aes-256-ctr
+
+
+chacha20
+chacha20-poly1305
+
+For example, your current:
+
+const key = crypto.randomBytes(32);
+const iv = crypto.randomBytes(16);
+
+
+const cipher = crypto.createCipheriv(
+    'aes-256-cbc',
+    key,
+    iv
+);
+
+is correct regarding sizes:
+
+AES-256-CBC
+    key = 32 bytes
+    IV  = 16 bytes
+One very important point
+
+If you're learning encryption with Node.js, I would recommend learning AES-256-GCM
+ alongside CBC.
+
+CBC provides confidentiality, but does not provide authentication/integrity.
+ An attacker can potentially modify ciphertext without the encryption itself
+  detecting that modification.
+
+GCM gives you:
+
+AES-256-GCM
+
+
+key       = 32 bytes
+nonce/IV  = 12 bytes (recommended)
+auth tag  = 16 bytes (commonly)
+
+So the typical Node.js structure becomes:
+
+const key = crypto.randomBytes(32);
+const iv = crypto.randomBytes(12);
+
+
+const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+
+
+const encrypted = Buffer.concat([
+    cipher.update(message, 'utf8'),
+    cipher.final()
+]);
+
+
+const authTag = cipher.getAuthTag();
+
+And during decryption you supply the authentication tag with:
+
+decipher.setAuthTag(authTag);
+
+For a new application, I'd generally choose AES-256-GCM or ChaCha20-Poly1305
+ rather than AES-256-CBC.
