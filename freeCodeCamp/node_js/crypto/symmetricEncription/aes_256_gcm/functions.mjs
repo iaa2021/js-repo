@@ -22,4 +22,13 @@ function decrypt(encryptedData, iv, key, authTag){
     decrypted += decipher.final('utf8');
     return decrypted;
 }
-export { encrypt, decrypt };
+function generateKey(password){
+    const salt = crypto.randomBytes(16);
+    const key = crypto.scryptSync(password, salt, 32);
+    fs.writeFile('key.txt', key.toString('hex'), (err) => {
+        if(err){ throw err; }
+        console.log('Key was written to file.');
+    });
+    return {key : key.toString('hex'), salt: salt.toString('hex')};
+}
+export { encrypt, decrypt, generateKey };
