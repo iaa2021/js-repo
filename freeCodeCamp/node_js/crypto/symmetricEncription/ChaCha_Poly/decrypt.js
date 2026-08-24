@@ -1,0 +1,10 @@
+import crypto from 'crypto';
+import { Buffer } from 'buffer';
+import fs from 'fs';
+import { decrypt } from './functions.mjs';
+const mytext = fs.readFileSync('encryptedData.json', 'utf-8');
+const { iv, authTag, encryptedData } = JSON.parse(mytext);
+const keyHex = fs.readFileSync('key.txt', 'utf-8');
+const key = Buffer.from(keyHex, 'hex');
+const decryptedText = decrypt(encryptedData, iv, key, authTag);
+console.log('Decrypted text:', decryptedText);

@@ -1,0 +1,10 @@
+import crypto from 'crypto';
+import { Buffer } from 'buffer';
+import fs from 'fs';
+import { generateKey, encrypt } from './functions.mjs';
+const password = 'my_secure_password';
+const { key, salt } = generateKey(password);
+const plaintext = fs.readFileSync('myData.txt', 'utf-8');
+const encryptedData = encrypt(plaintext, key);
+fs.writeFileSync('encryptedData.json', JSON.stringify(encryptedData, null, 2));
+console.log('Data encrypted and saved to encryptedData.json');
