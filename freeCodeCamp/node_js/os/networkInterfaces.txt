@@ -1,0 +1,206 @@
+Output of console.log('Current network interfaces: ', os.networkInterfaces());
+is:
+Current network interfaces:  {
+  lo: [
+    {
+      address: '127.0.0.1',
+      netmask: '255.0.0.0',
+      family: 'IPv4',
+      mac: '00:00:00:00:00:00',
+      internal: true,
+      cidr: '127.0.0.1/8'
+    },
+    {
+      address: '::1',
+      netmask: 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff',
+      family: 'IPv6',
+      mac: '00:00:00:00:00:00',
+      internal: true,
+      cidr: '::1/128',
+      scopeid: 0
+    }
+  ],
+  wlp2s0: [
+    {
+      address: '192.168.50.42',
+      netmask: '255.255.255.0',
+      family: 'IPv4',
+      mac: 'f8:16:54:8d:dd:12',
+      internal: false,
+      cidr: '192.168.50.42/24'
+    },
+    {
+      address: 'fe80::fe1b:da0c:84:e2d7',
+      netmask: 'ffff:ffff:ffff:ffff::',
+      family: 'IPv6',
+      mac: 'f8:16:54:8d:dd:12',
+      internal: false,
+      cidr: 'fe80::fe1b:da0c:84:e2d7/64',
+      scopeid: 3
+    }
+  ]
+}
+Sure. This output is from Node.js os.networkInterfaces(). It shows the network
+ interfaces currently available on your Linux system.
+
+You have two interfaces here:
+
+lo — loopback interface
+wlp2s0 — your Wi-Fi interface
+1. lo — loopback
+lo
+├── IPv4: 127.0.0.1
+└── IPv6: ::1
+
+lo is the loopback interface. It is not a physical network adapter.
+
+Its purpose is communication inside your own computer.
+
+127.0.0.1 → IPv4 loopback address
+::1 → IPv6 loopback address
+internal: true → confirms that this interface is internal
+MAC 00:00:00:00:00:00 → normal for loopback
+
+For example:
+
+const server = net.createServer();
+
+server.listen(3000, '127.0.0.1');
+
+The server would only be accessible from your own computer:
+
+127.0.0.1:3000
+
+Another computer on your network could not connect to it.
+
+2. wlp2s0 — Wi-Fi
+
+This is your actual wireless network interface.
+
+wlp2s0
+├── IPv4: 192.168.50.42
+└── IPv6: fe80::fe1b:da0c:84:e2d7
+
+The name follows Linux's predictable interface naming convention:
+
+wl → wireless LAN
+p2 → PCI bus/device location
+s0 → slot/device information
+
+So wlp2s0 is a Wi-Fi adapter.
+
+Its MAC address is:
+
+f8:16:54:8d:dd:12
+
+That's the hardware/network-interface address.
+
+IPv4 address
+192.168.50.42
+
+This is your computer's private IPv4 address on your local network.
+
+Your netmask is:
+
+255.255.255.0
+
+which is equivalent to:
+
+/24
+
+Therefore:
+
+192.168.50.42/24
+
+means your local network is approximately:
+
+192.168.50.0/24
+
+with addresses:
+
+192.168.50.1
+192.168.50.2
+...
+192.168.50.254
+
+Your machine is:
+
+192.168.50.42
+
+Typically your router might be something like:
+
+192.168.50.1
+
+although we cannot determine the router address from this output alone.
+
+IPv6 address
+
+You also have:
+
+fe80::fe1b:da0c:84:e2d7
+
+This is an IPv6 link-local address.
+
+The important part is:
+
+fe80::
+
+Addresses beginning with fe80:: are automatically generated for communication
+ on the local network segment.
+
+They are not normal globally routable Internet IPv6 addresses.
+
+Your output also says:
+
+scopeid: 3
+
+This identifies the interface/scope associated with that link-local IPv6 address.
+ In practice, when using a link-local IPv6 address, you may see syntax such as:
+
+fe80::fe1b:da0c:84:e2d7%wlp2s0
+
+The %wlp2s0 tells Linux which interface to use.
+
+What cidr means
+
+You have:
+
+192.168.50.42/24
+
+and:
+
+fe80::fe1b:da0c:84:e2d7/64
+
+CIDR notation combines the address with the network-prefix length.
+
+For IPv4:
+
+192.168.50.42/24
+
+/24 means the first 24 bits identify the network.
+
+For IPv6:
+
+fe80::fe1b:da0c:84:e2d7/64
+
+/64 means the first 64 bits identify the IPv6 network.
+
+Your output in a simplified form
+Computer
+│
+├── lo
+│   ├── 127.0.0.1/8
+│   └── ::1/128
+│
+└── wlp2s0  ← Wi-Fi
+    ├── MAC: f8:16:54:8d:dd:12
+    ├── IPv4: 192.168.50.42/24
+    └── IPv6: fe80::fe1b:da0c:84:e2d7/64
+
+So, your Wi-Fi is working and your machine currently has the local IPv4 address
+ 192.168.50.42.
+
+One important distinction: this output tells us the addresses assigned to your
+ interfaces, but not your default gateway, DNS servers, routing table, or whether
+ you have Internet connectivity. For those, commands such as ip route, resolvectl 
+ status, and ip addr provide additional information.
