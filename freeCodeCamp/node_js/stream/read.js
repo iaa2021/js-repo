@@ -11,5 +11,7 @@ const readInputFileStream = fs
 .createReadStream(inputFilePath);
 readInputFileStream.on('data', (chunk) => {
     console.log(`Received ${chunk.length} bytes of data.`);
-    console.log('\nReceived data: ', chunk.toString('utf-8'));
-});
+    console.log('\nReceived data: ', chunk.toString('utf-8')
+    .toUpperCase())
+}).on('finish', () => {
+    console.log('Transformation reading completed.'); });   
