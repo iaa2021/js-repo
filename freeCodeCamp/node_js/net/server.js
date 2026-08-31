@@ -8,6 +8,10 @@ const server = net.createServer((socket) => {
 
   socket.on('data', (data) => {
     console.log(`Received data: ${data}`);
+    console.log('Client IP:', socket.remoteAddress);
+    console.log('Client port:', socket.remotePort);
+    console.log('Server IP:', socket.localAddress);
+    console.log('Server port:', socket.localPort);
     // Process the received data here
   }); });
 
