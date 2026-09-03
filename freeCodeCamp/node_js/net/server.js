@@ -13,7 +13,10 @@ const server = net.createServer((socket) => {
     console.log('Server IP:', socket.localAddress);
     console.log('Server port:', socket.localPort);
     // Process the received data here
-  }); });
+    socket.write(`Received from client data is , ${data}`);
+    });
+    
+  }); 
 
 server.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
