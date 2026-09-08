@@ -17,15 +17,18 @@ async function main() {
   console.log(`Hello, dear ${name}!`);
 
   const number = await myQuestion('Enter a number: ');
-  const city = await myQuestion('What city do you live in? ');
+  
   let num = parseInt(number, 10);
-    if (isNaN(num)) {
+    while(Number.isNaN(num)) {
     console.log('Please enter a valid number.');
-    num = await myQuestion('Enter a number: ');
-       } else{
+    const newNumber = await myQuestion('Enter a number: ');
+    num = parseInt(newNumber, 10); 
+  }
+    
     console.log(`You entered the number: ${num}`);
     console.log(`The square of ${num} is: ${num * num}`);
-}
+
+  const city = await myQuestion('What city do you live in? ');
     console.log(`You live in ${city}.`);
     rl.close();
 }
