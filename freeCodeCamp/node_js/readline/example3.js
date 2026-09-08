@@ -1,0 +1,17 @@
+import readline from 'readline/promises';
+import { stdin as input, stdout as output } from 'process';
+const rl = readline.createInterface({ input, output });
+
+async function main() {
+    const name = await rl.question('What is your name? ');
+    const city = await rl.question('What city do you live in? ');
+    const number = await rl.question('Enter a number: ');
+    const num = Number(number);
+    console.log(`Hello, dear ${name}!`);
+    console.log(`You live in ${city}.`);
+    console.log(`You entered the number: ${num}`);
+    console.log(`The square of ${num} is: ${num * num}`);
+    rl.close();
+}
+
+main();
