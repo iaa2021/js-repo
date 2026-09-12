@@ -1,11 +1,11 @@
 import fs from "fs/promises";
-
+const articlePath = new URL("./article.md", import.meta.url);
 async function readFileContent() {
   try {
-    const fileContent = await fs.readFile("article.md", "utf8");
+    const fileContent = await fs.readFile(articlePath, "utf8");
     console.log("File content:", fileContent);
   } catch (err) {
-    console.log("File read successfully");
+    console.log("Failed to read file:", err.message);
   }
 }
 
