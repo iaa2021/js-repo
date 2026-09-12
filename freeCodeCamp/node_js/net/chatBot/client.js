@@ -1,6 +1,6 @@
 import net from 'net';
 import readline from 'readline';
-import {PORT}  from './server';
+import {PORT}  from './config.js';
 const rl = readline.createInterface({
     input : process.stdin, 
     output : process.stdout,
@@ -16,13 +16,22 @@ rl.on('line', (line) => {
     if(message.toLowerCase() === 'exit'){
         rl.close(); client.end(); return;
     }
-    client.write(message);
+    // send the message to the server
+    client.write(message + '\n');
     rl.prompt();
 });
 client.on('data', (data) => {
-    console.log(`\nServer: ${data.toString().trim()}`);
+    console.log(`\n${data.toString().trim()}`);
     rl.prompt();
 });
 rl.on('close', () =>{
+    console.log('Readline interface closed.');
+});
+client.on('end', () => {
     console.log('Disconnected from server.');
+    rl.close();
+});
+client.on('error', (err) => {
+    console.error(`Client error: ${err.message}`);
+    rl.close();
 });
