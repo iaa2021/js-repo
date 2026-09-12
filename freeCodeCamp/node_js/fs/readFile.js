@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 const articlePath = new URL("./article.md", import.meta.url);
+console.log('Absolute path to the article:', articlePath);
 async function readFileContent() {
   try {
     const fileContent = await fs.readFile(articlePath, "utf8");
