@@ -1,0 +1,385 @@
+how to set client and server with authorization
+
+Yes. In your current HTTPS chat, there are two different meanings of “authorization”:
+
+TLS certificate authentication — the client proves its identity with a client certificate (mTLS).
+Application authentication — client sends username/password or a token.
+
+Since you already have server-cert.pem, server-key.pem, and your earlier TLS-chat project used 
+requestCert, I recommend learning mutual TLS (mTLS) first.
+
+1. Server: require a client certificate
+
+Change your server options to:
+
+const options = {
+    key: fs.readFileSync('./certs/server-key.pem'),
+    cert: fs.readFileSync('./certs/server-cert.pem'),
+
+    requestCert: true,
+    rejectUnauthorized: true,
+
+    ca: [
+        fs.readFileSync('./certs/ca-cert.pem')
+    ]
+};
+
+The important parts are:
+
+requestCert: true
+
+The server asks the client for a certificate.
+
+rejectUnauthorized: true
+
+The server rejects clients whose certificate cannot be verified.
+
+ca: [
+    fs.readFileSync('./certs/ca-cert.pem')
+]
+
+The server trusts certificates signed by your CA.
+
+2. Client: provide its certificate
+
+Your client options become:
+
+const options = {
+    key: fs.readFileSync('./certs/client-key.pem'),
+    cert: fs.readFileSync('./certs/client-cert.pem'),
+
+    ca: [
+        fs.readFileSync('./certs/ca-cert.pem')
+    ],
+
+    rejectUnauthorized: true,
+
+    headers: {
+        'Content-Type': 'text/plain',
+        'Transfer-Encoding': 'chunked'
+    }
+};
+
+You will therefore have:
+
+certs/
+├── ca-cert.pem
+├── ca-key.pem
+├── server-cert.pem
+├── server-key.pem
+├── client-cert.pem
+└── client-key.pem
+
+The trust relationship is:
+
+             CA
+            /  \
+           /    \
+          ↓      ↓
+     server-cert  client-cert
+          ↑          ↑
+          |          |
+       Server       Client
+
+The server trusts the CA, and the client trusts the CA.
+
+3. Check whether the client was authorized
+
+On the server, inside your HTTPS request handler:
+
+const server = https.createServer(options, (req, res) => {
+
+    console.log('Client authorized:', req.socket.authorized);
+
+    if (!req.socket.authorized) {
+        res.writeHead(401);
+        res.end('Unauthorized\n');
+        return;
+    }
+
+    console.log(
+        'Client certificate:',
+        req.socket.getPeerCertificate().subject
+    );
+
+    res.writeHead(200, {
+        'Content-Type': 'text/plain'
+    });
+
+    res.write(
+        'Hello from HTTPS server! Enter your name to join the chat.\n'
+    );
+
+    // ...
+});
+
+Because you have:
+
+rejectUnauthorized: true
+
+an invalid client certificate normally won't even reach your application handler.
+
+4. Why this is different from your previous setup
+
+You previously had:
+
+rejectUnauthorized: false
+
+That means:
+
+Client
+   |
+   | certificate?
+   ↓
+Server
+   |
+   └── "I don't care whether I trust it"
+
+With:
+
+requestCert: true
+rejectUnauthorized: true
+
+you get:
+
+Client
+   |
+   | client certificate
+   ↓
+Server
+   |
+   | verify certificate
+   ↓
+   CA
+   |
+   ├── trusted → connection accepted
+   |
+   └── not trusted → connection rejected
+
+So this gives you real certificate-based authorization, not just a username typed into the chat.
+
+One important point
+
+You cannot simply create client-cert.pem yourself independently of the server certificate. 
+For proper mTLS, you should create a CA, then sign both the server and client certificates 
+with that CA.
+
+Absolutely. Since your current project is:
+
+/home/iaa/Desktop/gitStore/js-repo/freeCodeCamp/node_js/https/chat
+
+and you already have:
+
+certs/server-key.pem
+certs/server-cert.pem
+
+let's create a Certificate Authority (CA) and a client certificate signed by that CA.
+
+1. Go to your project
+cd /home/iaa/Desktop/gitStore/js-repo/freeCodeCamp/node_js/https/chat
+
+Create the certificate directory if necessary:
+
+mkdir -p certs
+cd certs
+2. Create the CA private key
+openssl genrsa -out ca-key.pem 4096
+
+You now have:
+
+ca-key.pem
+
+This is the CA's private key. Keep it secret.
+
+3. Create the CA certificate
+openssl req -x509 -new -nodes \
+  -key ca-key.pem \
+  -sha256 \
+  -days 3650 \
+  -out ca-cert.pem \
+  -subj "/C=UA/ST=Odesa/L=Odesa/O=MyChat/OU=CA/CN=MyChat Root CA"
+
+You now have:
+
+ca-key.pem
+ca-cert.pem
+
+Check it:
+
+openssl x509 -in ca-cert.pem -noout -subject -issuer -dates
+
+You should see something similar to:
+
+subject=C = UA, ST = Odesa, L = Odesa, O = MyChat, OU = CA, CN = MyChat Root CA
+issuer=C = UA, ST = Odesa, L = Odesa, O = MyChat, OU = CA, CN = MyChat Root CA
+
+The important thing is that subject and issuer are the same. That's because this is a self-signed CA certificate.
+
+4. Create the client's private key
+openssl genrsa -out client-key.pem 2048
+
+You now have:
+
+client-key.pem
+
+Again, this is private and should not be shared.
+
+5. Create the client Certificate Signing Request
+openssl req -new \
+  -key client-key.pem \
+  -out client.csr \
+  -subj "/C=UA/ST=Odesa/L=Odesa/O=MyChat/OU=Clients/CN=iaa-client"
+
+Now:
+
+client.csr
+
+is the certificate signing request.
+
+6. Create an extension file for the client certificate
+
+This is important for modern TLS certificates.
+
+Create:
+
+nano client-ext.cnf
+
+Put this inside:
+
+basicConstraints=CA:FALSE
+keyUsage=digitalSignature,keyEncipherment
+extendedKeyUsage=clientAuth
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid,issuer
+
+Save with:
+
+Ctrl+O → Enter → Ctrl+X
+
+7. Sign the client certificate with your CA
+
+Run:
+
+openssl x509 -req \
+  -in client.csr \
+  -CA ca-cert.pem \
+  -CAkey ca-key.pem \
+  -CAcreateserial \
+  -out client-cert.pem \
+  -days 825 \
+  -sha256 \
+  -extfile client-ext.cnf
+
+You should get:
+
+Certificate request self-signature ok
+subject=C = UA, ST = Odesa, L = Odesa, O = MyChat, OU = Clients, CN = iaa-client
+Getting CA Private Key
+
+Now your important files are:
+
+certs/
+├── ca-key.pem
+├── ca-cert.pem
+├── client-key.pem
+├── client-cert.pem
+├── client.csr
+└── client-ext.cnf
+8. Verify the client certificate
+
+First check who issued it:
+
+openssl x509 -in client-cert.pem -noout -subject -issuer
+
+You should get approximately:
+
+subject=C = UA, ST = Odesa, L = Odesa, O = MyChat, OU = Clients, CN = iaa-client
+issuer=C = UA, ST = Odesa, L = Odesa, O = MyChat, OU = CA, CN = MyChat Root CA
+
+Notice:
+
+subject = iaa-client
+issuer  = MyChat Root CA
+
+That's exactly what we want.
+
+9. Verify it cryptographically
+
+Run:
+
+openssl verify -CAfile ca-cert.pem client-cert.pem
+
+You want:
+
+client-cert.pem: OK
+
+Excellent.
+
+10. Check that it really is a client certificate
+
+Run:
+
+openssl x509 -in client-cert.pem -noout -text | grep -A2 "Extended Key Usage"
+
+You should see:
+
+Extended Key Usage:
+    TLS Web Client Authentication
+
+This is important because we specifically created:
+
+extendedKeyUsage=clientAuth
+
+So the certificate is intended for client authentication.
+
+Your final certificate structure
+
+You now have:
+
+                 MyChat Root CA
+                 ca-cert.pem
+                 ca-key.pem
+                       |
+            signs both certificates
+                       |
+             +---------+---------+
+             |                   |
+             ↓                   ↓
+      server certificate    client certificate
+      server-cert.pem       client-cert.pem
+      server-key.pem        client-key.pem
+
+For your HTTPS chat:
+
+                    HTTPS
+       ┌─────────────────────────────┐
+       │                             │
+       │          SERVER             │
+       │                             │
+       │  server-cert.pem            │
+       │  server-key.pem             │
+       │                             │
+       └──────────────┬──────────────┘
+                      │
+              requests certificate
+                      │
+                      ↓
+       ┌─────────────────────────────┐
+       │          CLIENT             │
+       │                             │
+       │  client-cert.pem            │
+       │  client-key.pem             │
+       │                             │
+       └─────────────────────────────┘
+
+One important next step: your existing server-cert.pem was probably created as a self-signed certificate, so the server certificate itself is not signed by this new CA. For proper mTLS, we should also create a new server-cert.pem signed by ca-cert.pem. Then both sides will trust the same CA:
+
+                 ca-cert.pem
+                     │
+              ┌──────┴──────┐
+              ↓             ↓
+       server-cert.pem   client-cert.pem
+              ↓             ↓
+           Server         Client
+
+That's the clean setup I recommend for your HTTPS chat.
