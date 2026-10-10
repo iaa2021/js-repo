@@ -12,7 +12,11 @@ const server = https.createServer(options, (req, res) => {
     
     let clientId = req.socket.remoteAddress + ':' + req.socket.remotePort;
     let clientName = null;
+    req.on('end', () => {
+        console.log('Client request ended');
+    });
     req.on('data', (chunk) => {
+        
         const message = chunk.toString().trim();
         if(!clientName) {
             clientName = message;
