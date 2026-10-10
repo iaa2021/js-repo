@@ -14,7 +14,11 @@ const server = https.createServer( options, (req, res) => {
     res.write('Hello, enter your name to chat.\n');
     let clientId = req.socket.remoteAddress + ':' + req.socket.remotePort;
     let clientName = null;
+    req.on('end', () => {
+    console.log(`Client ${clientName} ended request`);
+    });
     req.on('data', (chunk) =>{
+        console.log('Received raw data: ', JSON.stringify(chunk.toString().trim()));
         const message = chunk.toString().trim();
         if(!clientName){
             clientName = message;
@@ -25,7 +29,7 @@ const server = https.createServer( options, (req, res) => {
         console.log(`Client ${clientName} connected`);
         res.write(`Welcome ${clientName}, you can start chatting.\n`);    
         } else {
-            console.log(`Client {clientName} says ${message}\n`);
+            console.log(`Client ${clientName} says ${message}\n`);
             for(let [id, client] of clients){
                 if(id !== clientId){
                     client.res.write(`Client ${clientName} says ${message}\n`);
