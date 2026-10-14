@@ -1,0 +1,26 @@
+body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            background-color: purple;
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+        }
+        p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        main {
+            padding: 2rem;
+        }
+        selector {
+            display: block;
+            margin: 20px 0;
+            padding: 10px;
+            font-size: 1rem;
+        }
