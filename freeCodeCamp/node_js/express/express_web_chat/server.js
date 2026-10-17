@@ -23,11 +23,16 @@ const httpsServer = https.createServer(tlsOptions, app);
 const io = new Server(httpsServer);
 
 io.on('connection', (socket) => {
-  console.log('A client connected: ' + socket.id);
+  console.log('A client connected: ', socket.id);
     socket.on('join', (name) => {
         // Limit name length to 30 characters
         const safeName = String(name).trim().slice(0, 30); 
+        if(!safeName) {
+            return; // Ignore empty names
+        }
         socket.data.name = safeName;
+        // Notify all clients that a new user has joined
+        console.log(`${safeName} has joined the chat. Socket ID: ${socket.id}`);
         io.emit('system message', `${safeName} has joined the chat.`);
     });
     
@@ -46,7 +51,7 @@ io.on('connection', (socket) => {
         if(name) {
             io.emit('system message', `${name} has left the chat.`);
         }
-        console.log('A client disconnected: ' + socket.id);
+        console.log('A client disconnected: ', socket.id);
     });
 });
 
