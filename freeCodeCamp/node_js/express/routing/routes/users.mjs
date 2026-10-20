@@ -1,5 +1,5 @@
 import express from 'express';
-import router from 'express.Router';
+import { router } from 'express.Router';
 //MW specific for this rowter
 router.use((req, res, next) =>{
     console.log('Users router time: ', Date.now());
