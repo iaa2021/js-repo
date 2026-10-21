@@ -12,7 +12,7 @@ router.get('/', (req, res) => {
 });
 router.get('/:id', (req, res) =>{
     res.send(`
-        <h2>Product Details<h2>
+        <h2>Product Details</h2>
         <p>Product ID: ${req.params.id}</p>
         <p><a href="/products">Back to products</a></p>
         `);
