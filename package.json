@@ -1,6 +1,7 @@
 {
   "dependencies": {
-    "nvm": "^0.0.4"
+    "nvm": "^0.0.4",
+    "ws": "^8.22.0"
   },
   "devDependencies": {
     "chai": "^6.2.2",
