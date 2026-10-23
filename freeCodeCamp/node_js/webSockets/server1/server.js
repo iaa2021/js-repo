@@ -1,6 +1,13 @@
+import express from 'express';
+import {createServer} from 'http';
 import {WebSocketServer} from "ws";
+const app = express();
+
+app.use(express.static('public'));
 //new server
-const wss = new WebSocketServer({port:3000});
+const server = createServer(app);
+//attach WebSocket to the same server
+const wss = new WebSocketServer({server});
 console.log('WS server is running on ws://localhost:3000');
 //connection event handler
 wss.on('connection', (ws) =>{
@@ -18,3 +25,7 @@ wss.on('connection', (ws) =>{
     console.log('Client disconnected.')
     });
 });
+//start listening on port 3000
+server.listen(3000, () =>{
+    console.log('HTTP and WS run at http://localhost:3000');
+})

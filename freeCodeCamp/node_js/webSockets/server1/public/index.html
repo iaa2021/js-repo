@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebSocket Client</title>
+    <link rel="stylesheet" href="/style.css">
+    <script src="/chat.js" defer></script>
 </head>
 <body>
     <h1>WebSocketClient</h1>
@@ -11,7 +13,7 @@
     <div id="messages"></div>
     <div>
         <input type="text" id="messageInput" placeholder="Type your message">
-        <button onclick="sendMessage()">Send</button>
+        <button id="sendButton" onclick="sendMessage()">Send</button>
     </div>
 </body>
 </html>
