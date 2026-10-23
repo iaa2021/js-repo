@@ -12,10 +12,12 @@ const ws = new WebSocket('ws://localhost:3000');
 ws.on('open', () =>{
     console.log('Connected to WS server');
     promptForMessage();
+    //rl.prompt();
 });
 //listen for messages from the server
 ws.on('message', (message) =>{
     console.log(`\nServer: ${message}`);
+    rl.prompt();
 });
 //handle errors
 ws.on('error', (error) =>{
@@ -27,12 +29,12 @@ ws.on('close', () =>{
     process.exit(0);
 });
 function promptForMessage() {
-    rl.question('Enter message(or exit to quit):', (message) =>{
+    rl.question('myChat> ', (message) =>{
         if(message.toLowerCase().trim() === 'exit'){
             ws.close(); rl.close(); return;
         }
-        ws.send(message);
+        if(ws.readyState === WebSocket.OPEN){
+            ws.send(message)}
         promptForMessage();
-    })
-
+    });
 }
