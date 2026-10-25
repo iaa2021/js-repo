@@ -13,3 +13,47 @@ body {
 .message {
     margin: 5px 0;
 }
+/* join button - green */
+#joinButton {
+    background-color: green;
+    color: white;
+}
+/* exit button - red */
+#exitButton {
+    background-color: red;
+    color: white;
+}
+/* send button - purple */
+#sendButton {
+    background-color: purple;
+    color: white;
+}
+/* Common styles for all buttons */
+button {
+    border: none;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+    margin: 4px;
+}
+
+/* Change colour when the mouse is over a button */
+#joinButton:hover {
+    background-color: #218838;
+}
+
+#exitButton:hover {
+    background-color: #c82333;
+}
+
+#sendButton:hover {
+    background-color: #0056b3;
+}
+
+/* Make disabled buttons look inactive */
+button:disabled {
+    background-color: #bdbdbd;
+    color: #666;
+    cursor: not-allowed;
+}

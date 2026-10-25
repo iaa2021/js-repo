@@ -33,12 +33,40 @@ wss.on('connection', (ws) =>{
         } catch{ return; }
         //A client chooses a username
         if(data.type === 'join'){
-            const username = String(data.username ?? '').trim().slice(0, 30);
-        
-        if(!username){ return; }
+        //do not allow same connection to join twice
+        if(ws.username){
+            ws.send(JSON.stringify({
+                type: 'error',
+                text: 'You have already joined the chat.'
+            }));
+            return;
+        }
+        const username = String(data.username ?? '').trim().slice(0, 30);
+        if(!/^[a-zA-Z0-9_-]{3,30}$/.test(username)){
+            ws.send(JSON.stringify({
+                type: 'error', 
+                text: 'Username must be 3-30 chars: letters, numbers, _ or - '
+            }));
+            return;
+        }
+        //Check whether another client uses this username
+        const alreadyTaken = [...wss.clients].some(
+            client => client !== ws && client.readyState === WebSocket.OPEN &&
+        client.username?.toLowerCase() === username.toLowerCase()
+        );
+        //important: reject duplicate usernames
+        if(alreadyTaken){
+            ws.send(JSON.stringify({
+                type: 'error',
+                text:`Username "${username}" is already taken.`
+            }));
+            return;
+        }
+        //assign the username only after all checks pass.
         ws.username = username;
-        console.log(`${username} joined the chat`);
+            console.log(`${username} joined the chat`);
         ws.send(JSON.stringify({
+            type: 'system',
             username : 'Server',
             text :`Welcome, ${username}!`
         }));
