@@ -69,20 +69,25 @@ joinButton.addEventListener('click', () =>{
 //Function to send message |
 function sendMessage(){
 const text = messageInput.value.trim();
-if(!username){
-    statusElement.textContent = 'Join the chat first'; 
-    return;
-}
-if(!text) return;
-if(ws.readyState !== WebSocket.OPEN){
-    statusElement.textContent = 'WS is not connected';
-    return;
-    }
+const recipient = document.getElementById('recipientInput')
+.value.trim();
+if(!text || ws.readyState !== WebSocket.OPEN) return;
+if(recipient){
+    //private message to one user
     ws.send(JSON.stringify({
-        type: 'chat', text
+        type: 'private',
+        to: recipient,
+        text: text
     }));
-    messageInput.value = '';
-    messageInput.focus();
+} else {
+    //normal public message to everyone
+    ws.send(JSON.stringify({
+        type: 'chat',
+        text: text
+    }));
+}
+messageInput.value = '';
+messageInput.focus();
 };
 //attach click event to the button
 sendButton.addEventListener('click', sendMessage);

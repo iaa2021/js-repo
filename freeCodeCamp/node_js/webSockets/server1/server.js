@@ -2,6 +2,7 @@ import express from 'express';
 import {createServer} from 'https';
 import {WebSocketServer, WebSocket} from "ws";
 import { readFileSync } from 'fs';
+import { text } from 'stream/consumers';
 const app = express();
 // Serve index.html, chat.js and style.css from public/
 app.use(express.static('public'));
@@ -56,6 +57,41 @@ wss.on('connection', (ws) =>{
                 }
             }
         }
+        if(data.type === 'private'){
+            const recipient = String(data.to ?? '').trim();
+            const text = String(data.text ?? '').trim().slice(0, 1000);
+            if(!ws.username || !recipient || !text) return;
+            //find the connected user with this username
+            const target = [...wss.clients].find(
+                client => client.readyState === WebSocket.OPEN && 
+                client.username?.toLowerCase() === recipient.toLowerCase()
+            );
+            if(!target){
+                ws.send(JSON.stringify({
+                    username : 'Server',
+                    text : `User "${recipient}" is not online.`
+                }));
+                return;
+            }
+        
+        //send only to the recipient
+        target.send(JSON.stringify({
+            type: 'private',
+            username: ws.username,
+            to: target.username,
+            text: text
+        }));
+        //Also show copy to sender
+        if(target !== ws){
+            ws.send(JSON.stringify({
+                type: 'private', 
+                username: ws.username, 
+                to: target.username,
+                text: text,
+                sentByMe: true
+            }));
+        }
+        }
         });
     ws.on('close', () =>{
     console.log(`${ws.username || 'A client'} disconnected`);
@@ -64,4 +100,4 @@ wss.on('connection', (ws) =>{
 //start listening on port 3000
 server.listen(3000, () =>{
     console.log('HTTP and WS run at https://localhost:3000');
-});
+}); // ||
