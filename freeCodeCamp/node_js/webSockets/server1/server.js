@@ -5,9 +5,11 @@ import express from 'express';
 import {createServer} from 'https';
 import {WebSocketServer, WebSocket} from "ws";
 import { readFileSync } from 'fs';
+import cookieParser from 'cookie-parser';
 
 //import { text } from 'stream/consumers';
 const app = express();
+app.use(cookieParser());
 app.use(express.json({ limit: '10kb' }));
 const SESSION_DURATION = 24 *60 * 60 * 1000; // 24 hours
 
@@ -16,7 +18,7 @@ function hashToken(token){
 }
 function validUsername(username) { 
     return typeof username === 'string' &&
-/^[a-zA-Z0-9_-]{3-30}$/.test(username); }
+/^[a-zA-Z0-9_-]{3,30}$/.test(username); }
 
 function validPassword(password){
     return typeof password === 'string' && password.length >= 12 &&
