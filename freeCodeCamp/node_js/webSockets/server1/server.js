@@ -1,9 +1,117 @@
+import db from './database.js';
+import bcrypt from 'bcryptjs';
+import { randomBytes, createHash } from 'crypto';
 import express from 'express';
 import {createServer} from 'https';
 import {WebSocketServer, WebSocket} from "ws";
 import { readFileSync } from 'fs';
-import { text } from 'stream/consumers';
+
+//import { text } from 'stream/consumers';
 const app = express();
+app.use(express.json({ limit: '10kb' }));
+const SESSION_DURATION = 24 *60 * 60 * 1000; // 24 hours
+
+function hashToken(token){
+    return createHash('sha256').update(token).digest('hex');
+}
+function validUsername(username) { 
+    return typeof username === 'string' &&
+/^[a-zA-Z0-9_-]{3-30}$/.test(username); }
+
+function validPassword(password){
+    return typeof password === 'string' && password.length >= 12 &&
+    password.length <= 72;
+}
+
+//register new account
+app.post('/api/register', async(req, res) => {
+    const { username, password } = req.body ?? {};
+    if(!validUsername(username)){
+        return res.status(400).json({
+            error : 'Username must be 3-30 chars: letters, numbers, _ or -.'
+        });
+    }
+    if(!validPassword(password)){
+        return res.status(400).json({
+            error : 'Password must be 12-72 characters long.'
+        });
+    }
+    try{
+        const passwordHash = await bcrypt.hash(password, 12);
+        db.prepare(`
+            INSERT INTO users (username, password_hash)
+            VALUES (?, ?)`
+            ).run(username, passwordHash);
+            return res.status(201).json({
+                message: 'Acc created. You can now log in.'
+            });
+    } catch(error){
+        if(error.code === 'SQLITE_CONSTRAINT_UNIQUE'){
+            return res.status(409).json({
+                error: 'That username is already registered.'
+            });
+        }
+        console.error('Registration error: ', error);
+        return res.status(500).json({
+            error: 'Unable to register account.'
+        });
+    }
+});
+//log in and create session
+app.post('/api/login', async (req, res) =>{
+    const { username, password } = req.body ?? {};
+    if(
+        typeof username !== 'string' || typeof password !== 'string' ||
+        username.length > 30 || password.length > 72
+    ){
+        return res.status(400).json({
+            error: 'Invalid username or password.'
+        });
+    }
+    const user = db.prepare(`
+        SELECT id, username, password_hash
+        FROM users 
+        WHERE username = ?
+    `).get(username);
+    //Use the same message for unknown usernames and wrong passwords
+    if(!user || !(await bcrypt.compare(password, user?.password_hash ?? ''))){
+        return res.status(401).json({
+            error: 'Invalid username or password.'
+        });
+    }
+    const token = randomBytes(32).toString('base64url');
+    const tokenHash = hashToken(token);
+    const expiresAt = Date.now() + SESSION_DURATION;
+    db.prepare(`
+        INSERT INTO sessions (token_hash, user_id, expires_at)
+        VALUES (?, ?, ?)
+        `).run(tokenHash, user.id, expiresAt);
+        res.cookie('session', token, {
+            httpOnly: true, 
+            secure: true,
+            sameSite: 'strict',
+            path: '/',
+            maxAge: SESSION_DURATION
+        });
+        return res.json({
+            message: 'Login successful.',
+            username: user.username
+        });
+    });
+    //log out and invalidate the current session
+app.post('/api/logout', (req, res) =>{
+    const token = req.headers.cookie
+    ?.split(';').map(part => part.trim())
+    .find(part => part.startsWith('session='))
+    ?.slice('session='.length);
+    if(token){
+        db.prepare(`DELETE FROM sessions WHERE token_hash = ?`)
+        .run(hashToken(decodeURIComponent(token)));
+    }
+    res.setHeader('Set-Cookie', 
+        'session=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0');
+        return res.json({ message: 'Logged out.'});
+});    
 // Serve index.html, chat.js and style.css from public/
 app.use(express.static('public'));
 const options = {
