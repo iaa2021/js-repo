@@ -21,7 +21,7 @@ function validUsername(username) {
 /^[a-zA-Z0-9_-]{3,30}$/.test(username); }
 
 function validPassword(password){
-    return typeof password === 'string' && password.length >= 12 &&
+    return typeof password === 'string' && password.length >= 6 &&
     password.length <= 72;
 }
 
@@ -35,7 +35,7 @@ app.post('/api/register', async(req, res) => {
     }
     if(!validPassword(password)){
         return res.status(400).json({
-            error : 'Password must be 12-72 characters long.'
+            error : 'Password must be 6-72 characters long.'
         });
     }
     try{
