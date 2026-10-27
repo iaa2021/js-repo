@@ -117,8 +117,8 @@ app.post('/api/logout', (req, res) =>{
 // Serve index.html, chat.js and style.css from public/
 app.use(express.static('public'));
 const options = {
-    key : readFileSync('certs/server-key.pem'),
-    cert : readFileSync('certs/server-cert.pem')
+    key : readFileSync('certs/server-key-new.pem'),
+    cert : readFileSync('certs/server-cert-new.pem')
 }
 //new server
 const server = createServer(options, app);
