@@ -3,26 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Chat</title>
+    <title>Secure WebSocket Chat</title>
     <link rel="stylesheet" href="/style.css">
-    <script src="/chat.js" defer></script>
+    <script src="/chat.js"></script>
 </head>
 <body>
-    <div>
-        <input type="text" id="usernameInput" 
-        placeholder="Enter your name" maxlength="30">
-        <button id="joinButton" type="button">Join chat</button>
-        <button id="exitButton" type="button" disabled>Exit chat</button>
-    </div>
-    <h1>WebSocketClient</h1>
-    <div id="status">Connecting ...</div>
-    <div id="messages"></div>
-    <div>
-        <input type="text" id="messageInput" placeholder="Type your message"
-        maxlength="1000" disabled>
-        <input type="text" id="recipientInput" 
-        placeholder="Recipient username (blank = everyone)">
-        <button id="sendButton"  type="button">Send</button>
-    </div>
+    <h1>WebSocket Chat</h1>
+    <section id="authSection">
+        <h2>Account</h2>
+        <form id="authForm">
+            <label for="usernameInput">Username</label>
+            <input type="text" id="usernameInput" placeholder="3-30 chars"
+            minlength="3" maxlength="30" autocomplete="username" required>
+            <label for="passwordInput">Password</label>
+            <input type="password" id="passwordInput" minlength="12" maxlength="72"
+            autocomplete="current-password" placeholder="At least 12 chars" required>
+            <button type="submit" id="loginButton">Log in</button>
+            <button type="button" id="registerButton">Register</button>
+        </form>
+    </section>
+
+    <section id="chatSection" hidden>
+        <p>Logged in as <strong id="currentUsername"></strong></p>
+        <button type="button" id="logoutButton">Log out</button>
+        <h2>Messages</h2>
+        <div id="messages" aria-live="polite"></div>
+
+        <form id="messageForm">
+            <label for="recipientInput">
+                Recipient (leave blank for everyone)
+            </label>
+            <input
+                type="text"
+                id="recipientInput"
+                placeholder="Recipient username"
+                maxlength="30"
+            >
+
+            <label for="messageInput">Message</label>
+            <input
+                type="text"
+                id="messageInput"
+                placeholder="Type your message"
+                maxlength="1000"
+                autocomplete="off"
+                required
+            >
+
+            <button type="submit" id="sendButton">Send</button>
+        </form>
+    </section>
 </body>
 </html>

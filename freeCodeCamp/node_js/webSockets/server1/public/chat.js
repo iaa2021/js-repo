@@ -1,113 +1,226 @@
+
 const statusElement = document.getElementById('status');
 const messages = document.getElementById('messages');
-const messageInput = document.getElementById('messageInput');
-const sendButton = document.getElementById('sendButton');
+
+const authSection = document.getElementById('authSection');
+const authForm = document.getElementById('authForm');
 const usernameInput = document.getElementById('usernameInput');
-const joinButton = document.getElementById('joinButton');
-const exitButton = document.getElementById('exitButton');
-//connecting with WS server
-const ws = new WebSocket('wss://localhost:3000');
+const passwordInput = document.getElementById('passwordInput');
+const loginButton = document.getElementById('loginButton');
+const registerButton = document.getElementById('registerButton');
+
+const chatSection = document.getElementById('chatSection');
+const currentUsername = document.getElementById('currentUsername');
+const logoutButton = document.getElementById('logoutButton');
+
+const messageForm = document.getElementById('messageForm');
+const messageInput = document.getElementById('messageInput');
+const recipientInput = document.getElementById('recipientInput');
+const sendButton = document.getElementById('sendButton');
+
+let ws = null;
 let username = '';
-//connection opened
-ws.onopen = () =>{
-    statusElement.textContent = 'Connected to server';
-    statusElement.style.color = 'green'
-};
-//Listen for messages
-ws.onmessage = (event) =>{
-    let data;
-    try{
-        data = JSON.parse(event.data);
-    }catch{ return; }
-    const messageElement = document.createElement('div');
-    messageElement.className = 'message';
-    messageElement.textContent = data.username === 'Server' ? data.text
-    : `${data.username}: ${data.text}`;
-    messages.appendChild(messageElement);
-    messages.scrollTop = messages.scrollHeight;
-};
-//Handle errors
-ws.onerror = (error) =>{
-    statusElement.textContent = 'Error: ' + error.message;
-    statusElement.style.color = 'red';
-};
-//Handle connection close
-ws.onclose = () =>{
-    statusElement.textContent = 'Disconnected from server';
-    username = '';
-    statusElement.style.color = 'green';
-    setChatControls(false);
-};
-function setChatControls(joined) {
-    usernameInput.disabled = joined;
-    joinButton.disabled = joined;
-    messageInput.disabled = !joined;
-    sendButton.disabled = !joined;
-    exitButton.disabled = !joined;
+let busy = false;
+
+function setStatus(message, color = '') {
+    statusElement.textContent = message;
+    statusElement.style.color = color;
 }
-joinButton.addEventListener('click', () =>{
-    const name = usernameInput.value.trim();
-    if(!name){
-        statusElement.textContent = 'Please, enter your name'; 
-        usernameInput.focus();
-        return;
-    }
-    if(ws.readyState !== WebSocket.OPEN){
-        statusElement.textContent = 'Not connected to the server';
-        return;
-    }
-    username = name.slice(0,30);
-    ws.send(JSON.stringify({
-        type: 'join', username
-    }));
-    setChatControls(true);
-    statusElement.textContent =`You joined as ${username}`;
-    messageInput.focus();
-    //usernameInput.disabled = true;
-    //joinButton.disabled = true;
+
+function setBusy(value) {
+    busy = value;
+    loginButton.disabled = value;
+    registerButton.disabled = value;
+}
+
+async function apiRequest(path, body = {}) {
+    const response = await fetch(path, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
     });
-//Function to send message |
-function sendMessage(){
-const text = messageInput.value.trim();
-const recipient = document.getElementById('recipientInput')
-.value.trim();
-if(!text || ws.readyState !== WebSocket.OPEN) return;
-if(recipient){
-    //private message to one user
-    ws.send(JSON.stringify({
-        type: 'private',
-        to: recipient,
-        text: text
-    }));
-} else {
-    //normal public message to everyone
-    ws.send(JSON.stringify({
-        type: 'chat',
-        text: text
-    }));
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+        throw new Error(data.error || `Request failed: ${response.status}`);
+    }
+
+    return data;
 }
-messageInput.value = '';
-messageInput.focus();
-};
-//attach click event to the button
-sendButton.addEventListener('click', sendMessage);
-//send message on Enter key
-messageInput.addEventListener('keydown', (e) =>{
-    if(e.key === 'Enter'){
-        sendMessage();
+
+function addMessage(data) {
+    const element = document.createElement('div');
+    element.className = 'message';
+
+    // textContent prevents incoming messages from being interpreted as HTML.
+    if (data.type === 'error') {
+        element.textContent = `Error: ${data.text}`;
+    } else if (data.type === 'private') {
+        const direction = data.sentByMe
+            ? `Private message to ${data.to}`
+            : `Private message from ${data.username}`;
+
+        element.textContent = `${direction}: ${data.text}`;
+    } else if (data.username) {
+        element.textContent = `${data.username}: ${data.text}`;
+    } else {
+        element.textContent = data.text || '';
+    }
+
+    messages.appendChild(element);
+    messages.scrollTop = messages.scrollHeight;
+}
+
+function connectChat() {
+    // The browser automatically sends same-origin cookies on the WS handshake.
+    const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    ws = new WebSocket(`${protocol}//${location.host}`);
+
+    ws.onopen = () => {
+        setStatus('Connected to chat server.', 'green');
+
+        // This matches the join message expected by the current server.js.
+        ws.send(JSON.stringify({
+            type: 'join',
+            username
+        }));
+    };
+
+    ws.onmessage = (event) => {
+        let data;
+
+        try {
+            data = JSON.parse(event.data);
+        } catch {
+            return;
+        }
+
+        addMessage(data);
+    };
+
+    ws.onerror = () => {
+        setStatus('WebSocket connection error.', 'red');
+    };
+
+    ws.onclose = () => {
+        ws = null;
+        setStatus('Chat connection closed.');
+        sendButton.disabled = true;
+    };
+}
+
+authForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    if (busy) return;
+
+    setBusy(true);
+
+    try {
+        const data = await apiRequest('/api/login', {
+            username: usernameInput.value.trim(),
+            password: passwordInput.value
+        });
+
+        username = data.username;
+        currentUsername.textContent = username;
+
+        passwordInput.value = '';
+        authSection.hidden = true;
+        chatSection.hidden = false;
+
+        messages.replaceChildren();
+        connectChat();
+
+        messageInput.focus();
+    } catch (error) {
+        setStatus(error.message, 'red');
+    } finally {
+        setBusy(false);
     }
 });
-usernameInput.addEventListener('keydown',(event) =>{
-    if(event.key === 'Enter'){
-        joinButton.click();
+
+registerButton.addEventListener('click', async () => {
+    if (busy) return;
+
+    setBusy(true);
+
+    try {
+        const data = await apiRequest('/api/register', {
+            username: usernameInput.value.trim(),
+            password: passwordInput.value
+        });
+
+        setStatus(data.message || 'Account created. Please log in.', 'green');
+
+        // Registration does not log the user in automatically.
+        passwordInput.value = '';
+        passwordInput.setAttribute('autocomplete', 'current-password');
+        passwordInput.focus();
+    } catch (error) {
+        setStatus(error.message, 'red');
+    } finally {
+        setBusy(false);
     }
 });
-exitButton.addEventListener('click', () =>{
-    if(ws.readyState === WebSocket.OPEN){
-        ws.close(1000, 'User left the chat');
+
+messageForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+        setStatus('Not connected to the chat server.', 'red');
+        return;
     }
-    username = '';
-    setChatControls(false);
-    statusElement.textContent = 'You left the chat';
+
+    const text = messageInput.value.trim();
+    const recipient = recipientInput.value.trim();
+
+    if (!text) return;
+
+    if (recipient) {
+        ws.send(JSON.stringify({
+            type: 'private',
+            to: recipient,
+            text
+        }));
+    } else {
+        ws.send(JSON.stringify({
+            type: 'chat',
+            text
+        }));
+    }
+
+    messageInput.value = '';
+    messageInput.focus();
 });
-// ||
+
+logoutButton.addEventListener('click', async () => {
+    logoutButton.disabled = true;
+
+    try {
+        const data = await apiRequest('/api/logout');
+
+        // Close the active chat connection.
+        if (ws) {
+            ws.close(1000, 'Logged out');
+            ws = null;
+        }
+
+        username = '';
+        chatSection.hidden = true;
+        authSection.hidden = false;
+        messages.replaceChildren();
+        authForm.reset();
+
+        setStatus(data.message || 'Logged out.');
+        usernameInput.focus();
+    } catch (error) {
+        setStatus(error.message, 'red');
+    } finally {
+        logoutButton.disabled = false;
+    }
+});
