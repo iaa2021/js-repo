@@ -39,7 +39,7 @@ app.post('/api/register', async(req, res) => {
         });
     }
     try{
-        const passwordHash = await bcrypt.hash(password, 12);
+        const passwordHash = await bcrypt.hash(password, 6);
         db.prepare(`
             INSERT INTO users (username, password_hash)
             VALUES (?, ?)`
@@ -76,6 +76,8 @@ app.post('/api/login', async (req, res) =>{
         WHERE username = ?
     `).get(username);
     //Use the same message for unknown usernames and wrong passwords
+    //If the user does not exist, OR the entered password does not match 
+    // the stored hash, send a 401 error and stop processing the request.
     if(!user || !(await bcrypt.compare(password, user?.password_hash ?? ''))){
         return res.status(401).json({
             error: 'Invalid username or password.'
