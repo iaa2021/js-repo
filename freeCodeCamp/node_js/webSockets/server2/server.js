@@ -3,7 +3,6 @@ import {WebSocketServer, WebSocket} from 'ws';
 import express from 'express';
 import fs from 'fs';
 import { createServer } from 'http';
-import { WebSocketServer } from 'ws';
 
 //const options = {
   //  key : fs.readFileSync('./certs/server-key.pem'),
