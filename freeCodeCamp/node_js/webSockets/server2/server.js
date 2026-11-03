@@ -1,16 +1,15 @@
-import https from 'https';
+//import https from 'https';
 import {WebSocketServer, WebSocket} from 'ws';
 import express from 'express';
 import fs from 'fs';
-import { createServer } from 'http';
+import { createServer } from 'https';
 
-//const options = {
-  //  key : fs.readFileSync('./certs/server-key.pem'),
-   // cert : fs.readFileSync('./certs/server-cert.pem')
-//}
+const options = {
+  key : fs.readFileSync('./certs/server-key.pem'),
+   cert : fs.readFileSync('./certs/server-cert.pem')
+}
 const app = express();
-//const server = createServer(app, options);
-const server = createServer(app);
+const server = createServer(options, app);
 const wss = new WebSocketServer({server});
 
 wss.on('connection', (ws) =>{
