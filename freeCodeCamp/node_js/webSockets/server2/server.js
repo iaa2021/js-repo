@@ -3,7 +3,7 @@ import {WebSocketServer, WebSocket} from 'ws';
 import express from 'express';
 import fs from 'fs';
 import { createServer } from 'https';
-
+const PORT = 3000;
 const options = {
   key : fs.readFileSync('./certs/server-key.pem'),
    cert : fs.readFileSync('./certs/server-cert.pem')
@@ -22,6 +22,6 @@ wss.on('connection', (ws) =>{
     ws.send(`Server received: ${message}`);
     })
 });
-server.listen(3000, () =>{
-    console.log('Server linstens on port 3000');
+server.listen(PORT, () =>{
+    console.log(`Server running on port ${PORT}`);
 })
