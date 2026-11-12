@@ -1,11 +1,11 @@
-const status = document.getElementById('chatStatus');
+const chatStatus = document.getElementById('chatStatus');
 const messages = document.getElementById('messages');
 const messageInput = document.getElementById('messageInput');
 
 const ws = new WebSocket(`wss://localhost:${PORT}`);
 
 ws.onopen = () => {
-    chatStatus.textContent = 'Connected to the chat server.';
+    chatStatus.textContent = 'Connected to the chat server.'
     chatStatus.style.color = 'green';
 };
 ws.onmessage = (event) => {
