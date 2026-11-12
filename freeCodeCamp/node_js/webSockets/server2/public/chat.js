@@ -2,7 +2,8 @@ const chatStatus = document.getElementById('chatStatus');
 const messages = document.getElementById('messages');
 const messageInput = document.getElementById('messageInput');
 
-const ws = new WebSocket(`wss://localhost:${PORT}`);
+const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const ws = new WebSocket(`${wsProtocol}//${window.location.host}`);
 
 ws.onopen = () => {
     chatStatus.textContent = 'Connected to the chat server.'
@@ -31,6 +32,11 @@ messageInput.addEventListener('keypress', (event) => {
 function sendMessage() {
     const message = messageInput.value.trim();
     if (message !== '') {
+        if (ws.readyState !== WebSocket.OPEN) {
+            chatStatus.textContent = 'Not connected to the chat server.';
+            chatStatus.style.color = 'red';
+            return;
+        }
         ws.send(message);
         messageInput.value = '';
     }
