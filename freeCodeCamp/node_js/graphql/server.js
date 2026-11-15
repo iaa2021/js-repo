@@ -55,8 +55,13 @@ const root = {
   books: () => {
     return books;
   },
+  // error handling for book query
   book: ({ id }) => {
-    return books.find(book => book.id === parseInt(id));
+    const book = books.find(book => book.id === parseInt(id));
+    if (!book) {
+      throw new Error(`Book with ID ${id} not found`);
+    }
+    return book;
   },
   searchBooks: ({ query }) => {
     const lowerCaseQuery = query.toLowerCase();
@@ -68,7 +73,7 @@ const root = {
   // Mutation resolvers
   addBook: ({ input }) => {
     const newBook = {
-      id: books.length + 1,
+      id: String(books.length + 1),
       ...input,
     };
     books.push(newBook);
@@ -76,7 +81,9 @@ const root = {
   },
   updateBook: ({ id, input }) => {
     const bookIndex = books.findIndex(book => book.id === parseInt(id));
-    if (bookIndex === -1) return null;
+    if (bookIndex === -1) {
+      throw new Error(`Book with ID ${id} not found`);
+    }
     books[bookIndex] = { ...books[bookIndex], ...input };
     return books[bookIndex];
   },
