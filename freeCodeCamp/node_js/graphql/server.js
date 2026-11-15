@@ -35,6 +35,21 @@ const schema = buildSchema(`
     # searches for books by title or author
     searchBooks(query: String!): [Book!]!
   }
+    #inputs for adding/updating books
+  input BookInput {
+    title: String
+    author: String
+    year: Int
+    genre: String
+  }
+    type Mutation {
+    # Adds a new book to the collection
+    addBook(input: BookInput!): Book!
+    # Updates an existing book by ID
+    updateBook(id: ID!, input: BookInput!): Book
+    # Deletes a book by ID
+    deleteBook(id: ID!): Boolean
+  }
 `);
 const root = {
   books: () => {
@@ -49,6 +64,27 @@ const root = {
       book.title.toLowerCase().includes(lowerCaseQuery) ||
       book.author.toLowerCase().includes(lowerCaseQuery)
     );
+  },
+  // Mutation resolvers
+  addBook: ({ input }) => {
+    const newBook = {
+      id: books.length + 1,
+      ...input,
+    };
+    books.push(newBook);
+    return newBook;
+  },
+  updateBook: ({ id, input }) => {
+    const bookIndex = books.findIndex(book => book.id === parseInt(id));
+    if (bookIndex === -1) return null;
+    books[bookIndex] = { ...books[bookIndex], ...input };
+    return books[bookIndex];
+  },
+  deleteBook: ({ id }) => {
+    const bookIndex = books.findIndex(book => book.id === parseInt(id));
+    if (bookIndex === -1) return false;
+    books.splice(bookIndex, 1);
+    return true;
   }
 };
 
