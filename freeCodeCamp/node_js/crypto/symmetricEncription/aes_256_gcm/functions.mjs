@@ -25,10 +25,14 @@ function decrypt(encryptedData, iv, key, authTag){
 function generateKey(password){
     const salt = crypto.randomBytes(16);
     const key = crypto.scryptSync(password, salt, 32);
-    fs.writeFile('key.txt', key.toString('hex'), (err) => {
+    fs.writeFile('salt.txt', salt.toString('hex'), (err) => {
         if(err){ throw err; }
-        console.log('Key was written to file.');
+        console.log('Salt was written to file.');
     });
     return {key : key.toString('hex'), salt: salt.toString('hex')};
 }
-export { encrypt, decrypt, generateKey };
+function deriveKey(password, salt){
+    const key = crypto.scryptSync(password, Buffer.from(salt, 'hex'), 32);
+    return key.toString('hex');
+}
+export { encrypt, decrypt, generateKey, deriveKey };

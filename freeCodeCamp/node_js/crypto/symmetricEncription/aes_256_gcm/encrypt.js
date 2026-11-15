@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { Buffer } from 'buffer';
-import { generateKey, encrypt } from './functions.mjs';
+import { generateKey, deriveKey, encrypt } from './functions.mjs';
 import fs from 'fs';
 const myPassword = 'myStrongPassword';
 const { key, salt } = generateKey(myPassword);
